@@ -57,6 +57,12 @@ def run():
     extract(unseal(payload, key), root / 'input')
     extract((root / 'input/source.zip').read_bytes(), root / 'source')
     repo = root / 'source'
+    # A git archive prepared on Windows can retain CRLF. Match a Unix checkout
+    # for shell programs without modifying binary inputs or translation sources.
+    for script in repo.rglob('*.sh'):
+        data = script.read_bytes()
+        if b'\r\n' in data:
+            script.write_bytes(data.replace(b'\r\n', b'\n'))
     output = root / 'output'
     output.mkdir()
     env = dict(os.environ, PYTHONUTF8='1')
