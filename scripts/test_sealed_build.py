@@ -23,8 +23,11 @@ class SealedBuildTests(unittest.TestCase):
                 buf = io.BytesIO()
                 with zipfile.ZipFile(buf, 'w') as archive:
                     archive.writestr(name, b'x')
+                data = buf.getvalue()
+                if '\\' in name:
+                    data = data.replace(name.replace('\\', '/').encode(), name.encode())
                 with self.assertRaises(AssertionError):
-                    extract(buf.getvalue(), Path(tmp) / 'root')
+                    extract(data, Path(tmp) / 'root')
 
     def test_symlink_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:

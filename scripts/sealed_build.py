@@ -30,6 +30,7 @@ def extract(data, target):
         assert len(entries) <= 50000 and sum(i.file_size for i in entries) <= MAX_BYTES
         seen = set()
         for item in entries:
+            assert item.orig_filename == item.filename, 'Archive name was normalized'
             p = PurePosixPath(item.filename)
             assert not p.is_absolute() and '..' not in p.parts
             assert ':' not in item.filename and '\\' not in item.filename and len(p.parts) < 32

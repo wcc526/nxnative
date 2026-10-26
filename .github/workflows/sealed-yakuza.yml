@@ -28,6 +28,8 @@ jobs:
           python -m pip install --only-binary=:all: cryptography==50.0.2
           brew install xcodegen
           xcodebuild -downloadComponent MetalToolchain
+      - name: Test encryption and archive guards
+        run: python -m unittest discover -s scripts -p test_sealed_build.py -v
       - name: Download encrypted input
         env:
           GH_TOKEN: ${{ github.token }}
