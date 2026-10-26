@@ -57,11 +57,16 @@ def run():
     extract(unseal(payload, key), root / 'input')
     extract((root / 'input/source.zip').read_bytes(), root / 'source')
     repo = root / 'source'
-    # A git archive prepared on Windows can retain CRLF. Match a Unix checkout
-    # for shell programs without modifying binary inputs or translation sources.
-    for script in repo.rglob('*.sh'):
+    # Match Git's Unix text checkout, including headers consumed by shell tools.
+    # The separately archived game modules and prepared shaders are not touched.
+    text_suffixes = {'.sh', '.py', '.h', '.c', '.cpp', '.hpp', '.m', '.mm', '.swift',
+                     '.tsv', '.json', '.txt', '.yml', '.yaml', '.toml', '.xcconfig',
+                     '.xml', '.lock', '.mk', '.cs', '.csproj', '.md'}
+    for script in repo.rglob('*'):
+        if not script.is_file() or (script.suffix not in text_suffixes and script.name != 'Makefile'):
+            continue
         data = script.read_bytes()
-        if b'\r\n' in data:
+        if b'\0' not in data and b'\r\n' in data:
             script.write_bytes(data.replace(b'\r\n', b'\n'))
     output = root / 'output'
     output.mkdir()
